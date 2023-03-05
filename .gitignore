@@ -1,0 +1,15 @@
+# Python Virtual Environment
+env/
+*.pyc
+
+# Node Modules
+node_modules/
+
+# VS Code
+.vscode/
+
+# Data files
+src/raw_data/
+!src/raw_data/.gitkeep
+src/processed_data/
+!src/processed_data/.gitkeep
