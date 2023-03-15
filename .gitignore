@@ -13,3 +13,6 @@ src/raw_data/
 !src/raw_data/.gitkeep
 src/processed_data/
 !src/processed_data/.gitkeep
+
+# Credentials
+keys/*

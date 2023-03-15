@@ -1,19 +1,23 @@
 import csv
+import io
 import json
-import pathlib
+from google.cloud import storage
+import functions_framework
 
-RAW_DATA_DIR = pathlib.Path(__file__).parent / 'raw_data'
-PROCESSED_DATA_DIR = pathlib.Path(__file__).parent / 'processed_data'
+@functions_framework.http
+def prepare_data(request):
+    client = storage.Client()
+    raw_bucket = client.bucket('mjumbewu_musa_509_raw_data')
+    processed_bucket = client.bucket('mjumbewu_musa_509_processed_data')
 
-with open(
-    RAW_DATA_DIR / 'census_population_2020.json',
-    'r', encoding='utf-8',
-) as infile:
-    data = json.load(infile)
+    raw_blob = raw_bucket.blob('census/census_population_2020.json')
+    content = raw_blob.download_as_string()
+    data = json.loads(content)
 
-with open(
-    PROCESSED_DATA_DIR / 'census_population_2020.csv',
-    'w', encoding='utf-8',
-) as outfile:
+    processed_blob = processed_bucket.blob('census_population_2020/data.csv')
+    outfile = io.StringIO()
     writer = csv.writer(outfile)
     writer.writerows(data)
+    processed_blob.upload_from_string(outfile.getvalue(), content_type='text/csv')
+
+    return 'OK'

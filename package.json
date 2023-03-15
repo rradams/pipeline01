@@ -2,15 +2,19 @@
   "name": "pipeline1",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "src/extract_census.mjs",
   "scripts": {
+    "start": "dotenv functions-framework --target=extract_data",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@google-cloud/functions-framework": "^3.1.3",
+    "@google-cloud/storage": "^6.9.4",
     "adm-zip": "^0.5.10",
     "csv": "^6.2.7",
+    "dotenv-cli": "^7.1.0",
     "gdal-async": "^3.6.2",
     "node-fetch": "^3.3.0"
   }

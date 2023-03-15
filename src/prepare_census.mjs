@@ -1,18 +1,19 @@
 import * as csv from 'csv/sync';
-import fs from 'fs/promises';
+import storage from '@google-cloud/storage';
+import functions from '@google-cloud/functions-framework';
 
-const __dirname = new URL('.', import.meta.url).pathname;
-const RAW_DATA_DIR = `${__dirname}raw_data/`;
-const PROCESSED_DATA_DIR = `${__dirname}processed_data/`;
+functions.http('prepare_data', async (req, res) => {
+  const client = new storage.Storage();
+  const rawBucket = client.bucket('mjumbewu_musa_509_raw_data');
+  const processedBucket = client.bucket('mjumbewu_musa_509_processed_data');
 
-const content = await fs.readFile(
-  RAW_DATA_DIR + 'census_population_2020.json',
-  { encoding: 'utf8' },
-);
-const data = JSON.parse(content);
+  const rawBlob = rawBucket.file('census/census_population_2020.json');
+  const [content] = await rawBlob.download();
+  const data = JSON.parse(content);
 
-const outContent = csv.stringify(data);
-await fs.writeFile(
-  PROCESSED_DATA_DIR + 'census_population_2020.csv',
-  outContent, { encoding: 'utf8' },
-);
+  const processedBlob = processedBucket.file('census_population_2020/data.csv');
+  const outContent = csv.stringify(data);
+  await processedBlob.save(outContent, { resumable: false });
+
+  res.status(200).send('OK');
+});
