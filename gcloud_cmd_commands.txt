@@ -1,0 +1,30 @@
+gcloud functions deploy extract-census `
+  --region us-central1 `
+  --runtime python311 `
+  --trigger-http `
+  --source src/extract_census `
+  --entry-point extract_data `
+  --project musa509-377917 `
+  --service-account lab-data-pipeline-user@musa509-377917.iam.gserviceaccount.com
+
+# deploy workflow
+gcloud workflows deploy `
+  census-pipeline `
+  --source src/census_pipeline.yml `
+  --location us-central1 `
+  --service-account lab-data-pipeline-user@musa509-377917.iam.gserviceaccount.com
+
+# powers for account
+gcloud projects add-iam-policy-binding `
+  musa509-377917 `
+  --member serviceAccount:lab-data-pipeline-user@musa509-377917.iam.gserviceaccount.com `
+  --role roles/cloudfunctions.invoker `
+  --role roles/workflows.invoker
+
+# scheduler
+gcloud scheduler jobs create http `
+  census-pipeline-schedule `
+  --location us-central1 `
+  --schedule "0 9 * * 1-5" `  # 9:00 AM on Weekdays (Mon-Fri)
+  --uri https://workflowexecutions.googleapis.com/v1/projects/musa509-377917/locations/us-central1/workflows/new-pipeline-lab/executions `
+  --oauth-service-account-email lab-data-pipeline-user@musa509-377917.iam.gserviceaccount.com
